@@ -1,12 +1,26 @@
-from fastapi import APIRouter, HTTPException
+import os
+from datetime import timedelta, datetime, timezone
+
+from fastapi import APIRouter, HTTPException, Depends
+from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
+from typing import Annotated
 from starlette import status
+
 from models import Users
-from routers.dependencies import db_dependency, get_db
+from routers.dependencies import db_dependency
 from passlib.context import CryptContext
 
+from jose import jwt
 
-router = APIRouter()
+router = APIRouter(
+    prefix='/auth',
+    tags=['auth']
+)
+
+# openssl rand -hex 32
+SECRET_KEY = 'a506f3d30e634ea8f80fe5ffbbb1627b3813b3f1e7d6a54686efd78830a99299'
+ALGORITHM = 'HS256'
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -20,9 +34,85 @@ class CreateUserRequest(BaseModel):
     role: str
 
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str
 
-@router.post("/auth", status_code=status.HTTP_201_CREATED)
+
+
+def create_access_token(username: str, user_id: int, expires_delta: timedelta = None):
+
+    encode = {
+        'sub': username,
+        'id': user_id,
+    }
+
+    expires = datetime.now(timezone.utc) + expires_delta
+
+    encode.update({'exp': expires})
+
+    return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
+
+
+
+
+def authenticate_user(db: db_dependency, username: str, password: str):
+    user = db.query(Users).filter(Users.username == username).first()
+
+    if not user:
+        return None
+
+    if not bcrypt_context.verify(password, user.hashed_password):
+        return None
+
+    return user
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@router.post("/register", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency, create_user_request: CreateUserRequest):
+    existing_user = db.query(Users).filter(
+        Users.username == create_user_request.username
+    ).first()
+
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username already registered"
+        )
+
+    existing_email = db.query(Users).filter(
+        Users.email == create_user_request.email
+    ).first()
+
+    if existing_email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered"
+        )
 
     create_user_model = Users(
         username=create_user_request.username,
@@ -36,12 +126,30 @@ async def create_user(db: db_dependency, create_user_request: CreateUserRequest)
 
     db.add(create_user_model)
     db.commit()
+    db.refresh(create_user_model)
 
     return create_user_model
 
 
+@router.post("/token", response_model=Token)
+async def login_for_access_token(
+        form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+        db: db_dependency
+):
+    user = authenticate_user(db, form_data.username, form_data.password)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+    token = create_access_token(user.username, user.id, timedelta(minutes=20))
+
+    return {"access_token": token, "token_type": "bearer"}
 
 
-@router.get('/auth/')
-async def get_user():
+@router.get('/me', status_code=status.HTTP_200_OK)
+async def get_current_user():
     return {'user': 'authenticated'}
