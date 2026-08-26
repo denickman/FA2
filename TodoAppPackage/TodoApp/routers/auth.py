@@ -42,10 +42,15 @@ class Token(BaseModel):
 
 
 
-def create_access_token(username: str, user_id: int, expires_delta: timedelta = None):
+def create_access_token(
+        user_id: int,
+        username: str,
+        role: str,
+        expires_delta: timedelta = None):
     encode = {
         'sub': username,
         'id': user_id,
+        'role': role
     }
 
     expires = datetime.now(timezone.utc) + expires_delta
@@ -57,13 +62,15 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 
-        username: str = payload.get('sub')
         user_id: int = payload.get('id')
+        username: str = payload.get('sub')
+        role: str = payload.get('role')
+
 
         if username is None or user_id is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
 
-        return {'username': username, 'user_id': user_id}
+        return {'user_id': user_id, 'username': username, 'user_role': role}
 
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
@@ -160,6 +167,6 @@ async def login_for_access_token(
             headers={"WWW-Authenticate": "Bearer"}
         )
 
-    token = create_access_token(user.username, user.id, timedelta(minutes=20))
+    token = create_access_token(user.id, user.username, user.role, timedelta(minutes=20))
 
     return {"access_token": token, "token_type": "bearer"}
