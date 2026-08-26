@@ -19,6 +19,13 @@ class UserVerification(BaseModel):
     new_password: str = Field(min_length=6)
 
 
+class MessageResponse(BaseModel):
+    message: str
+
+
+
+
+
 
 router = APIRouter(
     prefix="/user",
@@ -34,9 +41,7 @@ async def get_user(user: user_dependency, db: db_dependency):
 
 
 
-
-
-@router.put('/password', status_code=status.HTTP_200_OK)
+@router.put('/password', status_code=status.HTTP_200_OK, response_model=MessageResponse)
 async def change_password(user: user_dependency, db: db_dependency, user_verification: UserVerification):
 
     if user is None:
@@ -48,10 +53,12 @@ async def change_password(user: user_dependency, db: db_dependency, user_verific
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Error on password verification")
 
 
-    user_model.hashed_password = bcrypt_context.encrypt(user_verification.password)
+    user_model.hashed_password = bcrypt_context.encrypt(user_verification.new_password)
+
     db.add(user_model)
     db.commit()
 
+    return {"message": "Password changed successfully"}
 
 
 
