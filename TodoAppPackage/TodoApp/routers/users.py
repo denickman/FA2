@@ -61,7 +61,7 @@ async def change_password(user: user_dependency, db: db_dependency, user_verific
     return {"message": "Password changed successfully"}
 
 
-@router.put("/phone_number/{phone_number}", status_code=status.HTTP_200_OK):
+@router.put("/phone_number/{phone_number}", status_code=status.HTTP_200_OK)
 async def change_phone_number(user: user_dependency, db: db_dependency, phone_number: str):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
