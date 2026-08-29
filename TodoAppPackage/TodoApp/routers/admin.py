@@ -1,10 +1,12 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Path, APIRouter
+
+
 from starlette import status
-from models import Todos
-from database import SessionLocal
+from ..models import Todos
+from ..database import SessionLocal
 from .auth import get_current_user
-from routers.dependencies import db_dependency, get_db
+from .dependencies import db_dependency, get_db
 
 
 router = APIRouter(

@@ -7,11 +7,11 @@ from pydantic import BaseModel
 from typing import Annotated
 from starlette import status
 
-from models import Users
-from routers.dependencies import db_dependency
 from passlib.context import CryptContext
-
 from jose import jwt, JWTError
+
+from ..models import Users
+from .dependencies import db_dependency
 
 router = APIRouter(
     prefix='/auth',

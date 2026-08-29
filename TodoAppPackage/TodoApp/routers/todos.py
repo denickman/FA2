@@ -2,13 +2,13 @@ from pydantic import BaseModel, Field
 from sqlalchemy.sql.annotation import Annotated
 from starlette import status
 
-from database import SessionLocal
+from ..database import SessionLocal
 from typing import Annotated
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, HTTPException, Path, APIRouter
 from fastapi.dependencies.models import Dependant
-from models import  Todos
-from routers.dependencies import db_dependency, get_db
+from ..models import  Todos
+from .dependencies import db_dependency, get_db
 
 from .auth import get_current_user
 

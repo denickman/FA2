@@ -3,12 +3,12 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException, APIRouter, Path
 from starlette import status
-from database import SessionLocal
+from ..database import SessionLocal
 from passlib.context import CryptContext
 
 from .auth import get_current_user
-from routers.dependencies import db_dependency, get_db
-from models import Todos, Users
+from .dependencies import db_dependency, get_db
+from ..models import Todos, Users
 
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
