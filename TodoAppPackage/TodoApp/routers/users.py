@@ -24,9 +24,6 @@ class MessageResponse(BaseModel):
 
 
 
-
-
-
 router = APIRouter(
     prefix="/user",
     tags=["user"],
@@ -37,8 +34,6 @@ async def get_user(user: user_dependency, db: db_dependency):
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return db.query(Users).filter(Users.id == user.get("user_id")).first()
-
-
 
 
 @router.put('/password', status_code=status.HTTP_200_OK, response_model=MessageResponse)
