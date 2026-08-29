@@ -7,6 +7,15 @@ app = FastAPI()
 
 Base.metadata.create_all(bind=engine)
 
+'''
+app.dependency_overrides  # это просто словарь: {}
+По умолчанию этот словарь пустой.
+
+. У объекта app есть словарь dependency_overrides. Ключ — оригинальная функция-зависимость
+ (та, что реально используется в роутах через Depends(...)), значение — функция-замена.
+
+'''
+
 app.include_router(auth.router)
 app.include_router(todos.router)
 app.include_router(admin.router)
