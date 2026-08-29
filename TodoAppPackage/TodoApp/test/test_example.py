@@ -22,7 +22,7 @@ def test_person_init(default_employee):
     assert default_employee.first_name == 'Jonh', 'First name should be Jonh'
     assert default_employee.last_name == 'Doe', 'Last name should be Doe'
 
-    assert default_employee.major == 'Doe', 'Last name should be Doe'
+    assert default_employee.major == 'Computer Science', 'Major should be Computer Science'
     assert default_employee.years == 3
 
 
