@@ -11,7 +11,7 @@ from passlib.context import CryptContext
 from jose import jwt, JWTError
 
 from ..models import Users
-from .dependencies import db_dependency
+from .dependencies import db_dependency, get_db
 
 router = APIRouter(
     prefix='/auth',
