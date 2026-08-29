@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 from ..database import  Base
@@ -6,6 +6,10 @@ from ..main import app
 from ..routers.todos import get_db, get_current_user
 from fastapi.testclient import TestClient
 from fastapi import Depends, FastAPI, HTTPException, status
+
+import pytest
+from ..models import Todos
+
 
 SQLALCHEMY_DATABASE_URI = 'sqlite:///./testdb.db'
 
@@ -34,7 +38,7 @@ def override_get_db():
 
 def override_get_current_user():
     return {
-        "id": 1,
+        "user_id": 1,
         "username": "den",
         "user_role": "admin"
     }
@@ -45,12 +49,70 @@ app.dependency_overrides[get_current_user] = override_get_current_user
 
 client = TestClient(app)
 
-def test_read_all_authenticated():
+@pytest.fixture
+def test_todo():
+    todo = Todos(
+        title="Learn the code",
+        description="Every day",
+        priority=5,
+        completed=False,
+        owner_id=1,
+    )
+
+    db = TestingSessionLocal()
+    db.add(todo)
+    db.commit()
+    yield todo
+    with engine.connect() as connection:
+        connection.execute(text('DELETE FROM todos;'))
+        connection.commit()
+
+
+
+
+
+
+
+
+
+
+def test_read_all_authenticated(test_todo):
     response = client.get("/")
     # app пройдется по всем зарегестированным роутам и найдет get("/") роут
     # вызовет у todos.py потому что именно там есть этот роутер
     # @router.get('/', status_code=status.HTTP_200_OK)
     assert response.status_code == status.HTTP_200_OK
+    assert response.json() == [
+        {
+            "id": 1,
+            "title": "Learn the code",
+            "description": "Every day",
+            "priority": 5,
+            "completed": False,
+            'owner_id': 1,
+        }
+    ]
+
+
+
+
+
+def test_read_one_authenticated(test_todo):
+    response = client.get("/todo/1")
+
+    assert response.status_code == status.HTTP_200_OK
+
+    assert response.json() == {
+            "id": 1,
+            "title": "Learn the code",
+            "description": "Every day",
+            "priority": 5,
+            "completed": False,
+            'owner_id': 1,
+        }
+    
+
+
 
 
 
