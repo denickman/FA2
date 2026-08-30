@@ -1,7 +1,7 @@
 import os
 from datetime import timedelta, datetime, timezone
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request, status
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from pydantic import BaseModel
 from typing import Annotated
@@ -13,10 +13,15 @@ from jose import jwt, JWTError
 from ..models import Users
 from .dependencies import db_dependency, get_db
 
+from fastapi.templating import Jinja2Templates
+
 router = APIRouter(
     prefix='/auth',
     tags=['auth']
 )
+
+templates = Jinja2Templates(directory="TodoApp/templates")
+
 
 # openssl rand -hex 32
 SECRET_KEY = 'a506f3d30e634ea8f80fe5ffbbb1627b3813b3f1e7d6a54686efd78830a99299'
@@ -25,6 +30,19 @@ ALGORITHM = 'HS256'
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
 # ✅ исправлено
+
+
+### Pages ###
+
+@router.get("/login-page")
+def render_login_page(request: Request):
+    return templates.TemplateResponse(request, "login.html", {})
+
+
+
+
+
+
 
 
 class CreateUserRequest(BaseModel):
@@ -78,6 +96,8 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
 
 
 
+
+### Endpoints ###
 
 def authenticate_user(db: db_dependency, username: str, password: str):
     user = db.query(Users).filter(Users.username == username).first()

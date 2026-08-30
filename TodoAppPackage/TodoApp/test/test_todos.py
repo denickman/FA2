@@ -1,27 +1,20 @@
-from urllib import response
-
 from ..routers.todos import get_db, get_current_user
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import status
 
 from ..models import Todos
 
-
-
 from .utils import *
-
 
 
 app.dependency_overrides[get_db] = override_get_db
 app.dependency_overrides[get_current_user] = override_get_current_user
 
 
-
-
 def test_read_all_authenticated(test_todo):
-    response = client.get("/")
-    # app пройдется по всем зарегестированным роутам и найдет get("/") роут
+    response = client.get("/todo")
+    # app пройдется по всем зарегестированным роутам и найдет get('/todo') роут
     # вызовет у todos.py потому что именно там есть этот роутер
-    # @router.get('/', status_code=status.HTTP_200_OK)
+    # @router.get('', status_code=status.HTTP_200_OK) с prefix='/todo'
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == [
         {
@@ -33,9 +26,6 @@ def test_read_all_authenticated(test_todo):
             'owner_id': 1,
         }
     ]
-
-
-
 
 
 def test_read_one_authenticated(test_todo):
@@ -53,23 +43,21 @@ def test_read_one_authenticated(test_todo):
         }
 
 
-
 def test_read_one_authenticated_not_found():
     response = client.get("/todo/999")
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {"detail":"Todo not found"}
-
+    assert response.json() == {"detail": "Todo not found"}
 
 
 # creating
 
 def test_create_todo(test_todo):
 
-    request_data={
-        'title':'New todo',
-        'description':'New description',
-        'priority':5,
-        'completed':False,
+    request_data = {
+        'title': 'New todo',
+        'description': 'New description',
+        'priority': 5,
+        'completed': False,
     }
 
     response = client.post("/todo", json=request_data)
@@ -84,17 +72,15 @@ def test_create_todo(test_todo):
     assert model.priority == request_data['priority']
 
 
-
 # updating
 
 def test_update_todo(test_todo):
-    request_data={
+    request_data = {
         'title': 'Change the title',
         'description': 'Change the description',
         'priority': 5,
-        'completed':False,
+        'completed': False,
     }
-
 
     response = client.put('/todo/1', json=request_data)
 
@@ -103,7 +89,6 @@ def test_update_todo(test_todo):
     model = db.query(Todos).filter(Todos.id == 1).first()
     assert model is not None
     assert model.title == 'Change the title'
-
 
 
 def test_update_todo_not_exist(test_todo):
@@ -120,7 +105,6 @@ def test_update_todo_not_exist(test_todo):
     assert response.json() == {'detail': 'Todo not found'}
 
 
-
 # deleting
 def test_delete_todo(test_todo):
     response = client.delete('/todo/1')
@@ -131,34 +115,7 @@ def test_delete_todo(test_todo):
     assert model is None
 
 
-
 def test_delete_todo_not_found(test_todo):
     response = client.delete('/todo/999')
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == { 'detail': 'Todo not found'}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    assert response.json() == {'detail': 'Todo not found'}
