@@ -16,7 +16,7 @@
             };
 
             try {
-                const response = await fetch('/todos/todo', {
+                const response = await fetch('/todo/todo', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -66,7 +66,7 @@
 
             console.log(`${todoId}`)
 
-            const response = await fetch(`/todos/todo/${todoId}`, {
+            const response = await fetch(`/todo/todo/${todoId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -76,7 +76,7 @@
             });
 
             if (response.ok) {
-                window.location.href = '/todos/todo-page'; // Redirect to the todo page
+                window.location.href = '/todo/todo-page'; // Redirect to the todo page
             } else {
                 // Handle error
                 const errorData = await response.json();
@@ -98,7 +98,7 @@
                     throw new Error('Authentication token not found');
                 }
 
-                const response = await fetch(`/todos/todo/${todoId}`, {
+                const response = await fetch(`/todo/todo/${todoId}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -107,7 +107,7 @@
 
                 if (response.ok) {
                     // Handle success
-                    window.location.href = '/todos/todo-page'; // Redirect to the todo page
+                    window.location.href = '/todo/todo-page'; // Redirect to the todo page
                 } else {
                     // Handle error
                     const errorData = await response.json();
@@ -123,7 +123,7 @@
     }
 
     // Login JS
-    const loginForm = document.getElementById('loginForm');
+    const loginForm = document.getElementById('login-form');
     if (loginForm) {
         loginForm.addEventListener('submit', async function (event) {
             event.preventDefault();
@@ -150,9 +150,10 @@
                     const data = await response.json();
                     // Delete any cookies available
                     logout();
+
                     // Save token to cookie
                     document.cookie = `access_token=${data.access_token}; path=/`;
-                    window.location.href = '/todos/todo-page'; // Change this to your desired redirect page
+                    window.location.href = '/todo/todo-page'; // Change this to your desired redirect page
                 } else {
                     // Handle error
                     const errorData = await response.json();
