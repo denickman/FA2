@@ -191,7 +191,7 @@
             };
 
             try {
-                const response = await fetch('/auth', {
+                const response = await fetch('/auth/register', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -204,7 +204,7 @@
                 } else {
                     // Handle error
                     const errorData = await response.json();
-                    alert(`Error: ${errorData.message}`);
+                    alert(`Error: ${errorData.detail}`);
                 }
             } catch (error) {
                 console.error('Error:', error);

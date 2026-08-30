@@ -34,11 +34,16 @@ oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 ### Pages ###
 
+
 @router.get("/login-page")
 def render_login_page(request: Request):
     return templates.TemplateResponse(request, "login.html", {})
 
 
+
+@router.get("/register-page")
+def render_register_page(request: Request):
+    return templates.TemplateResponse(request, "register.html", {})
 
 
 
@@ -109,23 +114,6 @@ def authenticate_user(db: db_dependency, username: str, password: str):
         return None
 
     return user
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
