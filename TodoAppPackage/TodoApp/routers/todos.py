@@ -70,6 +70,21 @@ async def render_todo_page(request: Request, db: db_dependency):
         print(f"ERROR in render_todo_page: {e}")
         return redirect_to_login()
 
+
+@router.get('/add-todo-page', status_code=status.HTTP_200_OK)
+async def render_add_todo_page(request: Request):
+    try:
+        user = await get_current_user(request.cookies.get('access_token'))
+        if user is None:
+            return redirect_to_login()
+
+        return templates.TemplateResponse(request, 'add-todo.html', {"user": user})
+
+    except Exception as e:
+        print(f"ERROR in render_add_todo_page: {e}")
+        return redirect_to_login()
+
+
 ### Endpoint ###
 
 @router.get('', status_code=status.HTTP_200_OK)
@@ -102,7 +117,7 @@ async def create_todo(user: user_dependency, db: db_dependency, todo_request: To
     if user is None:
         raise HTTPException(status_code=401, detail='Auth failed')
 
-    todo_model = Todos(**todo_request.model_dump(), owner_id=user.get('id'))
+    todo_model = Todos(**todo_request.model_dump(), owner_id=user.get('user_id'))
     db.add(todo_model)
     db.commit()
 

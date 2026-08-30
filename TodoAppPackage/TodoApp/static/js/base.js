@@ -1,4 +1,4 @@
-    // Add Todo JS
+// Add Todo JS
     const todoForm = document.getElementById('todoForm');
     if (todoForm) {
         todoForm.addEventListener('submit', async function (event) {
@@ -12,11 +12,11 @@
                 title: data.title,
                 description: data.description,
                 priority: parseInt(data.priority),
-                complete: false
+                completed: false
             };
 
             try {
-                const response = await fetch('/todo/todo', {
+                const response = await fetch('/todo', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -54,7 +54,7 @@
             title: data.title,
             description: data.description,
             priority: parseInt(data.priority),
-            complete: data.complete === "on"
+            completed: data.complete === "on"
         };
 
         try {
@@ -66,7 +66,7 @@
 
             console.log(`${todoId}`)
 
-            const response = await fetch(`/todo/todo/${todoId}`, {
+            const response = await fetch(`/todo/${todoId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -98,7 +98,7 @@
                     throw new Error('Authentication token not found');
                 }
 
-                const response = await fetch(`/todo/todo/${todoId}`, {
+                const response = await fetch(`/todo/${todoId}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`
