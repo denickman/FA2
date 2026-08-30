@@ -53,6 +53,26 @@ def redirect_to_login():
     return redirect_response
 
 
+@router.get('/edit-todo-page/{todo_id}', status_code=status.HTTP_200_OK)
+async def render_edit_page(request: Request, todo_id: int, db: db_dependency):
+    try:
+        user = await get_current_user(request.cookies.get('access_token'))
+
+        if user is None:
+            return redirect_to_login()
+
+        todo = db.query(Todos).filter(Todos.id == todo_id).filter(Todos.owner_id == user.get('user_id')).first()
+
+        if todo is None:
+            return redirect_to_login()
+
+        return templates.TemplateResponse(request, 'edit-todo.html', {"todo": todo, "user": user})
+
+    except Exception as e:
+        print(f"ERROR in render_edit_page: {e}")
+        return redirect_to_login()
+
+
 
 ### PAGES ###
 
@@ -83,6 +103,21 @@ async def render_add_todo_page(request: Request):
     except Exception as e:
         print(f"ERROR in render_add_todo_page: {e}")
         return redirect_to_login()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ### Endpoint ###

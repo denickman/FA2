@@ -1,10 +1,12 @@
 from .models import Base
 from .database import engine
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, status
 from .routers import auth, todos, admin, users
 
-from fastapi.templating import Jinja2Templates
+# from fastapi.templating import Jinja2Templates # no need if we are using Redirection here
 from fastapi.staticfiles import StaticFiles
+
+from fastapi.responses import RedirectResponse
 
 
 
@@ -16,7 +18,7 @@ app = FastAPI()
 Base.metadata.create_all(bind=engine)
 
 
-templates = Jinja2Templates(directory='TodoApp/templates')
+# templates = Jinja2Templates(directory='TodoApp/templates')
 
 app.mount('/static', StaticFiles(directory='TodoApp/static'), name='static')
 
@@ -39,7 +41,8 @@ app.include_router(users.router)
 
 @app.get('/')
 def test(request: Request):
-    return templates.TemplateResponse(request, 'home.html', {})
+    # return templates.TemplateResponse(request, 'home.html', {})
+    return RedirectResponse(url='/todos/todo-page', status_code=status.HTTP_302_FOUND)
 
 
 
