@@ -42,7 +42,7 @@ app.include_router(users.router)
 @app.get('/')
 def test(request: Request):
     # return templates.TemplateResponse(request, 'home.html', {})
-    return RedirectResponse(url='/todos/todo-page', status_code=status.HTTP_302_FOUND)
+    return RedirectResponse(url='/todo/todo-page', status_code=status.HTTP_302_FOUND)
 
 
 
