@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: todoapp
+      POSTGRES_PASSWORD: todoapp
+      POSTGRES_DB: todoapp
+    ports:
+      - "5432:5432"       # опционально — позволяет подключиться к базе снаружи (DBeaver/TablePlus), если захочешь заглянуть внутрь
+    volumes:
+      - pgdata:/var/lib/postgresql/data   # сохраняет данные между `docker compose down` / перезапусками
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U todoapp"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      # "db" ниже — это имя сервиса Postgres выше, а не "localhost" — внутри сети
+      # Docker контейнеры обращаются друг к другу по имени сервиса.
+      DATABASE_URL: postgresql://todoapp:todoapp@db:5432/todoapp
+      SECRET_KEY: ${SECRET_KEY}
+    depends_on:
+      db:
+        condition: service_healthy   # не стартуем приложение, пока Postgres реально не готов принимать соединения
+
+volumes:
+  pgdata:

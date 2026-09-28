@@ -24,7 +24,10 @@ templates = Jinja2Templates(directory="TodoApp/templates")
 
 
 # openssl rand -hex 32
-SECRET_KEY = 'a506f3d30e634ea8f80fe5ffbbb1627b3813b3f1e7d6a54686efd78830a99299'
+# openssl rand -hex 32
+# Фолбэк на старое хардкод-значение оставлен только для удобства локальной разработки
+# без Docker — в docker-compose.yml это значение приходит из переменной SECRET_KEY / .env.
+SECRET_KEY = os.getenv('SECRET_KEY', 'a506f3d30e634ea8f80fe5ffbbb1627b3813b3f1e7d6a54686efd78830a99299')
 ALGORITHM = 'HS256'
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

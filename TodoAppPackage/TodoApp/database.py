@@ -1,31 +1,23 @@
+import os
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
+# Берём DATABASE_URL из переменной окружения (её задаёт docker-compose.yml для Postgres).
+# Если переменной нет — используем локальный SQLite, как раньше, чтобы uvicorn
+# без Docker продолжал работать точно так же, как и до этого.
+SQLALCHEMY_DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///./todosapp.db')
 
-# for local sqlite DB
-SQLALCHEMY_DATABASE_URL = 'sqlite:///./todosapp.db'
+# Этот параметр нужен только для SQLite (он по умолчанию разрешает только один поток).
+# Postgres и MySQL его не понимают и выдадут ошибку, если передать.
+connect_args = (
+    {"check_same_thread": False}
+    if SQLALCHEMY_DATABASE_URL.startswith('sqlite')
+    else {}
+)
 
-# for MySQL
-# SQLALCHEMY_DATABASE_URL = 'mysql+pymysql://root:qwerty123@127.0.0.1:3306/ToDoAppDatabase'
-
-
-
-# for Postgres SQL
-# name of DB should be the same as you set it in pgAdmin4 programm
-# SQLALCHEMY_DATABASE_URL = 'postgresql://postgres:qwerty@localhost/ToDoAppDatabase'
-# postgresql://postgres:qwerty@localhost/ToDoAppDatabase
-#     ↓           ↓       ↓        ↓            ↓
-#   драйвер    юзер    пароль    хост       имя базы данных
-
-
-
-# for local sqlite DB
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
-
-
-# for Postgres SQL
-# engine = create_engine(SQLALCHEMY_DATABASE_URL)
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args=connect_args)
 
 
 
